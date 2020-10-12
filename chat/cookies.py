@@ -1,37 +1,44 @@
 import random
 import string
+import uuid
 from . models import UserSession, ConfRoom
 from django.shortcuts import redirect
 from django.shortcuts import render
 from django.contrib.sessions.models import Session
 
-def set_cookies():
-	new_user = UserSession(ID_user = UserSession.get_id_user)
-	new_user.save()
+def set_cookies(request):
+	ID_user = str(uuid.uuid4())
+	print(ID_user)
+	new_user = UserSession.objects.create(ID_user = ID_user)
+
+	request.session['ID_user'] = new_user.ID_user
+
 	print("Set cookies")
 	#redirect to home
 
-def check_room():
+def check_room(request, room_name):
 	try:
-		s = Session.objects.get()
-		s = s.get_decoded()
-		if ConfRoom.objects.filter(ID_room = s['ID_room']):
-			print('your room:', s['ID_room'])
+		s = request.session['ID_room']
+		if ConfRoom.objects.filter(ID_room = s) and s == room_name:
+			print('your room:', s)
+			return True
 		else:
-			print('NE TA ROOM', s['ID_room'])
-	except:
+			print('NE TA ROOM', s)
+			return False
+	except Exception as e:
+		print(e)
+		return False
 		print("Err from room")
 
-def check_cookies(name_func):
+def check_cookies(request, name_func):
 	try:
-		s = Session.objects.get()
-		s = s.get_decoded()
-		#без декодикорования принимаем редирект на чат, с декодированием просто проверяем наличие куки(принимать в функицию аргумент decoded true/false)
-		print('PRINT SESSION from ' + name_func + ': ID_user = ', s['ID_user'], ", ID_room = ", s['ID_room'])
-		if UserSession.objects.filter(ID_user = s['ID_user']):
+		ID_user = request.session['ID_user']
+		print('PRINT SESSION from ' + name_func + ': ID_user = ', ID_user)
+		if UserSession.objects.filter(ID_user = ID_user):
 			print ("Hello user")
 		else:
-			set_cookies()
-	except:
-		print("ERROR")
-		set_cookies()
+			set_cookies(request)
+	except Exception as e:
+		print("ERROR from " + name_func)
+		print(e)
+		set_cookies(request)

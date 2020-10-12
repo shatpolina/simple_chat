@@ -6,7 +6,7 @@ urlpatterns = [
 	path('', views.index, name='index'),
 	path('newroom', views.new_room),
 	#path('toroom', views.to_room),
-	#path('random', views.random_room),
+	path('random', views.random_room),
 	path('<str:room_name>/', views.room),
 ]
 
