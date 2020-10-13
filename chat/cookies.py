@@ -8,13 +8,10 @@ from django.contrib.sessions.models import Session
 
 def set_cookies(request):
 	ID_user = str(uuid.uuid4())
-	print(ID_user)
+	print("SET COOKIES, ID_user: ", ID_user)
 	new_user = UserSession.objects.create(ID_user = ID_user)
 
 	request.session['ID_user'] = new_user.ID_user
-
-	print("Set cookies")
-	#redirect to home
 
 def check_room(request, room_name):
 	try:
@@ -40,5 +37,5 @@ def check_cookies(request, name_func):
 			set_cookies(request)
 	except Exception as e:
 		print("ERROR from " + name_func)
-		print(e)
+		#print(e)
 		set_cookies(request)

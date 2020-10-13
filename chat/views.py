@@ -7,8 +7,6 @@ from django.shortcuts import redirect
 from django.shortcuts import render
 from django.contrib.sessions.models import Session
 
-new_room = UserSession
-
 # Create your views here.
 def index(request):
 	cookies.check_cookies(request, 'chat')
@@ -36,12 +34,13 @@ def random_room(request):
 	user = UserSession.objects.get(pk = ID_user)
 	try:
 		room = ConfRoom.objects.values_list('ID_room', flat=True).filter(wait_status = True).first()
-		random_room = ConfRoom.objects.get(pk = room)
-		ConfRoom.objects.filter(pk = room).update(wait_status = False)
-		# !!! Как сделать чтобы к одному юзеру не привязывалось второй раз?!
-		user.ID_room.add(random_room)
+		if not cookies.check_room(request, room):
+			random_room = ConfRoom.objects.get(pk = room)
+			user.ID_room.add(random_room)
+			#исключить повторную  запись в одного юзера
+			ConfRoom.objects.filter(pk = room).update(wait_status = False)
 
-		request.session['ID_room'] = random_room.ID_room
+			request.session['ID_room'] = random_room.ID_room
 	except:
 		print('ALL CHATS ARE BUSY')
 		return redirect('/chat/')
